@@ -1,25 +1,28 @@
 Vagrant.configure("2") do |config|
-    config.vm.box = "generic/debian"
+    config.vm.box = "generic/centos8"
     config.vm.network "private_network", ip: "10.10.0.100"
     config.vm.network "forwarded_port", guest: 80, host: 8080
     config.vm.network "forwarded_port", guest: 8080, host: 8081
     config.vm.synced_folder ".", "/vagrant"
 
     config.vm.provider "virtualbox" do |vb|
-        vb.name = "homework01_debian"        
+        vb.name = "homework01_centos8"        
         vb.memory = "512"
         
     end
 
     config.vm.provision "shell", inline: <<-SETUP
-        apt update
-        apt install -y apache2
-        apt install -y php
-        sudo mkdir /var/www/php/
-        sudo cp /vagrant/index.php /var/www/php/index.php
-        sudo cp /vagrant/index.html /var/www/html/index.html
-        sudo cp /vagrant/ports.conf /etc/apache2/ports.conf 
-        sudo cp /vagrant//000-default.conf /etc/apache2/sites-available/000-default.conf
+    sudo yum -y install httpd
+    sudo yum -y install php
+    sudo mkdir /var/log/httpd/ht /var/log/httpd/php
+    sudo mkdir /var/www/html/ht
+    sudo cp /vagrant/index.html /var/www/html/ht/
+    sudo cp /vagrant/index.html /var/www/html
+    sudo mkdir /var/www/html/php
+    sudo cp /vagrant/index.php /var/www/html/php/
+    sudo cp /vagrant/httpd.conf /etc/httpd/conf/httpd.conf
+    sudo firewall-cmd --permanent --add-port=80/tcp --add-port=8080/tcp
+    sudo firewall-cmd --reload
     SETUP
 
         #config.vm.provision "file", source: "./index.php", destination: "/var/www/php/"
@@ -27,5 +30,5 @@ Vagrant.configure("2") do |config|
         #config.vm.provision "file", source: "./ports.conf", destination: "/etc/apache2/"
         #config.vm.provision "file", source: "./000-default.conf", destination: "/etc/apache2/sites-available/"
 
-        config.vm.provision "shell", inline: "sudo systemctl restart apache2"
+        config.vm.provision "shell", inline: "sudo systemctl restart httpd"
 end
