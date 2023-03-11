@@ -1,0 +1,1 @@
+https://app.vagrantup.com/woopiq/boxes/centos8
