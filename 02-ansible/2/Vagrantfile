@@ -1,0 +1,30 @@
+Vagrant.configure("2") do |config| 
+  config.vm.box = "generic/debian9"
+  config.vm.synced_folder ".", "/vagrant"
+  config.vm.provider "virtualbox" do |vb|
+  vb.memory = "512"
+  end
+
+  config.vm.define "master", primary: true do |master| #машина, с которой запускаем playbook, так как у меня Windows
+    master.vm.provision "shell", inline: <<-SHELL
+      apt update
+      apt install -y ansible
+      apt install -y sshpass
+      chmod 755 /etc/ansible/
+      cp /vagrant/index.php /etc/ansible/    
+  SHELL
+  end
+
+  config.vm.define "static", primary: true do |static|
+      static.vm.network "private_network", ip: "10.10.0.102"
+  end
+
+  config.vm.define "dynamic", primary: true do |dynamic|
+    dynamic.vm.network "private_network", ip: "10.10.0.103"
+end
+
+config.vm.define "reverse_proxy", primary: true do |reverse_proxy|
+    reverse_proxy.vm.network "private_network", ip: "10.10.0.104"
+end
+
+end
